@@ -20,7 +20,7 @@ Note that this entire tutorial focuses on modding the game with C++ (mostly focu
     - [Calling conventions in practice](#calling-conventions-in-practice)
     - [Function pointers](#function-pointers)
 - [Working with Cocos2d-x](#working-with-cocos2d-x)
-    - [Making your first layer]()
+    - [Making your first layer](#making-your-first-layer)
 - [Working with the gd classes]()
 - [Understanding assembly]()
 - [Reverse engineering]()
@@ -458,7 +458,7 @@ And now you should have successfully hooked a gd function! After loading the dll
 # Working with Cocos2d-x
 
 
-Making a layer:
+# Making your first layer:
 
 First, start with the header: 
 

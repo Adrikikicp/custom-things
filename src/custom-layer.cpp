@@ -57,7 +57,7 @@ bool CustomLayer::init() {
     
     // set the color tint of the background. rob usually uses a dark blue color
     // but here we just use gray instead
-    backgroundSprite->setColor({100, 100, 100});
+    backgroundSprite->setColor({0, 0, 255});
     
     // set the Z order to -1, to make sure the sprite ends up as the background.
     // if you want to really make sure its at the bottom you could set this to -999

@@ -51,7 +51,7 @@ Mods are usually distributed as dynamic libraries (with file extensions such as 
 
 ## Mods in the future
 
-This repo shows the process of making a mod for windows which involves gd.h + cocos-headers + minhook, however, tools and SDKs such as [lilac](https://github.com/lilac-sdk), [hyperdash](), [Cacao](https://github.com/camila314/CacaoSDK) and [poweredbypie](https://poiweredbypie) intend to provide a much better experience in modding, and reducing conflicts between mods. At the time of writing this there are no usable SDKs for windows, however there are some utility libraries to facilitate the hooking process, such as [mat-dash](https://github.com/matcool/mat-dash/)
+This repo shows the process of making a mod for windows which involves gd.h + cocos-headers + minhook, however, tools and SDKs such as [lilac](https://github.com/lilac-sdk), [hyperdash](https://github.com/gd-hyperdash), [Cacao](https://github.com/camila314/CacaoSDK) and [poweredbypie](https://poiweredbypie) intend to provide a much better experience in modding, and reducing conflicts between mods. At the time of writing this there are no usable SDKs for windows, however there are some utility libraries to facilitate the hooking process, such as [mat-dash](https://github.com/matcool/mat-dash/)
 
 # Setup
 
@@ -456,3 +456,116 @@ MH_CreateHook(
 And now you should have successfully hooked a gd function! After loading the dll in you should see a message box after clicking on the more games button
 
 # Working with Cocos2d-x
+
+
+Making a layer:
+
+First, start with the header: 
+
+For creating a layer we need to define that's a layer, you can make that on the header file
+
+```cpp
+
+
+class FirstLayer : public CCLayer(){
+
+
+
+}
+```
+
+Now, we created a layer. But doesn't have some much to use it
+
+
+For that reason we need to make some stuff in the hooks to work
+
+
+```cpp
+// the _H suffix is a way of distingushing between the hook and the trampoline
+// you can choose them to be anything you want, as function names don't affect how hooks work
+inline bool (__thiscall* MenuLayer_onMoreGames)(CCLayer*, cocos2d::CCObject*);
+ bool __fastcall MenuLayer_onMoreGames_H(CCLayer* self, void*, cocos2d::CCObject* sender) {
+    // here we are calling the trampoline, executing the code
+
+    //First we need a Result
+
+
+    bool result = MenuLayer_onMoreGames(self, sender);
+    // of the target function, while also being able to run our own code afterwards/before
+    
+    MessageBoxA(NULL, "MenuLayer::onMoreGames has been called", "info", MB_OK);
+
+    auto director = cocos2d::CCDirector::sharedDirector(); //That define a director, so we can define the size
+    auto size = director->getWinSize(); //We got the size
+
+    //In-game process
+    CCSprite* buttonSprite = cocos2d::CCSprite::createWithSpriteFrameName("GJ_pathsBtn.png"); //for example: new 2.2 paths button using a spritesheet (GJ_GameSheet04.png)
+    buttonSprite->setPosition({100, 100});
+    buttonSprite->setScale(0.5f);
+
+    self->addChild(sprite);
+
+    auto button = gd::CCMenuItemSpriteExtra::create(buttonSprite,self, nullptr); //NullPTR because not exists a callback that define the menu
+
+
+    auto menu = CCMenu::create();
+    menu->setPosition({150, 100});
+
+    self->addChild(menu);
+
+
+
+
+
+    return result;
+
+
+}
+
+DWORD WINAPI myThread(void*) {
+    MH_Initialize();
+auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(NULL));
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x1919C0), // target
+        reinterpret_cast<void*>(&MenuLayer_onMoreGames_H),
+        reinterpret_cast<void**>(&MenuLayer_onMoreGames)
+    );
+
+    MH_EnableHook(MH_ALL_HOOKS);
+
+    return 0;
+}
+
+// ...
+```
+
+Now need to callback
+
+```cpp
+
+
+class FirstLayer : public CCLayer(){
+
+
+protected:
+
+virtual void init();
+
+ virtual void keyBackClicked();
+    void backButtonCallback(CCObject*);
+
+public:
+    static CustomLayer* create();
+
+    // button callback function. if we were robtop this would be in MenuLayer, however we are not
+    void switchToCustomLayerButton(CCObject*);
+};
+
+
+```
+}
+
+
+
+August 20th 2022
+
